@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#
+# Script to generate eclipse project file for import.
+# @author: Lu, Ken
+#
+
+ROOT=$PWD
+BUILD_TYPE=Debug
+
+# check python-catkin-tools
+if ! [ -x "$(command -v catkin)" ]; then
+    echo "Error: python catkin tools package is not installed, please install as \"sudo apt-get \
+install python-catkin-tools\""
+    exit 1
+fi
+
+# parse the build type from command line's parameter
+case `echo "$*" | tr '[:upper:]' '[:lower:]'` in
+    "debug")
+        BUILD_TYPE=Debug
+        ;;
+    "release")
+        BUILD_TYPE=Release
+        ;;
+    *)
+        BUILD_TYPE=Debug
+        ;;
+esac
+
+generate_makefile() {
+    echo "Generating the make file for eclipse..."
+    catkin build  --force-cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+}
+
+generate_eclipse_project() {
+    echo "Generating eclipse project files for each ROS package under build directory..."
+    cd $ROOT/build
+    for PROJECT in `find $PWD -name .project`; do
+        DIR=`dirname $PROJECT`
+        echo $DIR
+        cd $DIR
+        echo ">>> Generate .project file for $DIR..."
+        awk -f $(rospack find mk)/eclipse.awk .project > .project_with_env && mv .project_with_env .project
+    done
+    cd $ROOT
+}
+
+generate_makefile
+generate_eclipse_project
+
+echo ""
+echo "Success! Please import $ROOT/build into eclipse!"
+echo ""
