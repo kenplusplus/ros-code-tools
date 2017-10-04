@@ -8,13 +8,6 @@
 ROOT=$PWD
 BUILD_TYPE=Debug
 
-# check python-catkin-tools
-if ! [ -x "$(command -v catkin)" ]; then
-    echo "Error: python catkin tools package is not installed, please install as \"sudo apt-get \
-install python-catkin-tools\""
-    exit 1
-fi
-
 # parse the build type from command line's parameter
 case `echo "$*" | tr '[:upper:]' '[:lower:]'` in
     "debug")
@@ -30,7 +23,7 @@ esac
 
 generate_makefile() {
     echo "Generating the make file for eclipse..."
-    catkin build  --force-cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    catkin build --force-cmake -G"Eclipse CDT4 - Unix Makefiles" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
 }
 
 generate_eclipse_project() {
@@ -45,6 +38,21 @@ generate_eclipse_project() {
     done
     cd $ROOT
 }
+
+# check python-catkin-tools
+if ! [ -x "$(command -v catkin)" ]; then
+    echo "ERROR: python catkin tools package is not installed, please install as \"sudo apt-get \
+install python-catkin-tools\""
+    exit 1
+fi
+
+# check whether ros mk package installed
+rospack find mk
+if [ $? -ne 0 ]; then
+    echo "ERROR: ros mk package was not found, please install as \" sudo apt-get install \
+ros-kinetic-mk \""
+    exit 1
+fi
 
 generate_makefile
 generate_eclipse_project
