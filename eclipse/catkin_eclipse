@@ -39,6 +39,13 @@ generate_eclipse_project() {
     cd $ROOT
 }
 
+# check whether setup.bash has been sourced before this script
+if ! [ -x "$(command -v rospack)" ]; then
+    echo "ERROR: rospack could not be found, please make sure run \"source \
+/opt/ros/<ros distro>/setup.bash\" before this script"
+    exit 1
+fi
+
 # check python-catkin-tools
 if ! [ -x "$(command -v catkin)" ]; then
     echo "ERROR: python catkin tools package is not installed, please install as \"sudo apt-get \
